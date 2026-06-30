@@ -68,7 +68,7 @@ id_file = "data/tmdb_movie_ids.csv"
 
 df = pd.read_csv(id_file)
 
-for movie_id in tqdm(df['id'][:10]):
+for movie_id in tqdm(df['id']):
     all_movie_data.append(fetch_movie_data(movie_id))
 
     time.sleep(0.25)  # avoid rate limits
