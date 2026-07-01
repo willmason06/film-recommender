@@ -77,4 +77,6 @@ tmdb_id2 = 346698
 movie_index1 = get_index_from_tmdb_id(tmdb_id1)
 movie_index2 = get_index_from_tmdb_id(tmdb_id2)
 
-comparison(movie_index1, movie_index2)
+#comparison(movie_index1, movie_index2)
+
+get_most_similar(movie_index2)
