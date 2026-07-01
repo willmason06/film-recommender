@@ -2,20 +2,14 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 
-# -----------------------------
-# Load data
-# -----------------------------
+
 ids = np.load("data/movie_ids.npy")
 embeddings = np.load("data/movie_embeddings.npy")
-
 df = pd.read_csv("data/tmdb_movie_data.csv")
 
-# map id -> title
+
 id_to_title = dict(zip(df["id"], df["title"]))
 
-# -----------------------------
-# convert TMDB ID → array index
-# -----------------------------
 def get_index_from_tmdb_id(movie_id):
     matches = np.where(ids == movie_id)[0]
 
@@ -24,9 +18,7 @@ def get_index_from_tmdb_id(movie_id):
 
     return matches[0]
 
-# -----------------------------
-# similarity function
-# -----------------------------
+
 def get_most_similar(movie_index, top_k=5):
     query_vec = embeddings[movie_index].reshape(1, -1)
 
@@ -34,7 +26,6 @@ def get_most_similar(movie_index, top_k=5):
 
     sorted_idx = np.argsort(scores)[::-1]
 
-    # remove itself
     sorted_idx = sorted_idx[1:top_k+1]
 
     query_id = ids[movie_index]
@@ -49,20 +40,41 @@ def get_most_similar(movie_index, top_k=5):
 
         print(f"{title} ({movie_id}) | similarity: {scores[i]:.4f}")
 
-# -----------------------------
-# interactive loop (TMDB ID input)
-# -----------------------------
-while True:
-    user_input = input("\nEnter TMDB movie ID (-1 to quit): ")
 
-    if user_input == "-1":
-        break
+def comparison(movie_index1, movie_index2, top_k=5):
+    query_vec1 = embeddings[movie_index1].reshape(1, -1)
+    query_vec2 = embeddings[movie_index2].reshape(1, -1)
 
-    try:
-        tmdb_id = int(user_input)
+    combined_vec = (query_vec1 + query_vec2) / 2
+    scores = cosine_similarity(combined_vec, embeddings)[0]
 
-        movie_index = get_index_from_tmdb_id(tmdb_id)
-        get_most_similar(movie_index)
+    sorted_idx = np.argsort(scores)[::-1]
 
-    except Exception as e:
-        print("Error:", e)
+    sorted_idx = sorted_idx[:top_k+1]
+
+    # what the hell -- why not skip this
+    query_id1 = ids[movie_index1]
+    query_id2 = ids[movie_index2]
+    # what the hell
+    query_title1 = id_to_title.get(query_id1, "Unknown")
+    query_title2 = id_to_title.get(query_id2, "Unknown")
+
+    print(f"\nInput movies: {query_title1} and {query_title2} \n")
+    print("Most similar movies:\n")
+
+    for i in sorted_idx:
+        movie_id = ids[i]
+        title = id_to_title.get(movie_id, "Unknown")
+
+        print(f"{title} ({movie_id}) | similarity: {scores[i]:.4f}")
+
+
+tmdb_id1 = 577922
+tmdb_id2 = 346698
+
+
+
+movie_index1 = get_index_from_tmdb_id(tmdb_id1)
+movie_index2 = get_index_from_tmdb_id(tmdb_id2)
+
+comparison(movie_index1, movie_index2)
