@@ -27,7 +27,7 @@ def find_tmdb_id(title, year):
 
     return results[0]["id"]
 
-file = '../data/letterboxd/ratings.csv'
+file = 'data/letterboxd/watchlist.csv'
 df = pd.read_csv(file)
 
 letterboxd_names = df['Name']
@@ -44,4 +44,4 @@ for name, year in tqdm(zip(letterboxd_names, letterboxd_years),
 
 df.loc[:,'id'] = ids
 
-df.to_csv("data/letterboxd/ratings_withid.csv", index=False)
+df.to_csv("data/letterboxd/watchlist_withid.csv", index=False)

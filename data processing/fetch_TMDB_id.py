@@ -1,24 +1,26 @@
 import requests
 import pandas as pd
+import numpy as np
 from tqdm import tqdm
 import time
-
 from dotenv import load_dotenv
+
 import os
+
 load_dotenv()
 API_KEY = os.getenv("TMDB_API_KEY")
 
-
 BASE_URL = "https://api.themoviedb.org/3"
 
+existing_ids = set(np.load("data/movie_ids.npy"))
 
-
-def fetch_movies(page):
+def fetch_movies(page, sort_method, year):
     url = f"{BASE_URL}/discover/movie"
     params = {
         "api_key": API_KEY,
-        "sort_by": "vote_average.desc",
-        "vote_count.gte": 100,
+        "sort_by": sort_method,
+        "vote_count.gte": 2,
+        "primary_release_year": year,
         "include_adult": False,
         "page": page,
     }
@@ -26,22 +28,81 @@ def fetch_movies(page):
     return response.json()
 
 
-all_movies = []
-TOTAL_PAGES = 500
+sort_methods = ["vote_average.desc", "popularity.desc", "revenue.desc", "vote_count.desc", "primary_release_date.desc"]
+
+new_ids_added = 0
+tasks = []
+
+for year in range(1900, 2027):
+    for sort_method in tqdm(sort_methods):
+        first_page = fetch_movies(1, sort_method, year)
+        total_pages = min(first_page["total_pages"], 500)
+
+        for page in tqdm(range(1, total_pages + 1)):
+
+              tasks.append(
+                (page, sort_method, year)
+            )
 
 
-for page in tqdm(range(1, TOTAL_PAGES + 1)):
-    data = fetch_movies(page)
+from concurrent.futures import ThreadPoolExecutor
 
-    for movie in data.get("results", []):
-        all_movies.append({
-            "id": movie["id"],
+def fetch_task(task):
+    page, sort_method, year = task
 
-        })
+    try:
+        return fetch_movies(page, sort_method, year)
+    except Exception:
+        return None
 
-    time.sleep(0.25)  # avoid rate limits
+with ThreadPoolExecutor(max_workers=20) as executor:
+    results = executor.map(fetch_task, tasks)
 
-df = pd.DataFrame(all_movies)
-df.to_csv("data/tmdb_movie_ids.csv", index=False)
+    for data in tqdm(results, total=len(tasks)):
 
-print("Saved:", len(df))
+        if data is None:
+            continue
+
+        for movie in data.get("results", []):
+            movie_id = movie["id"]
+
+            if movie_id in existing_ids:
+                continue
+
+            existing_ids.add(movie_id)
+            new_ids_added += 1
+
+            if new_ids_added % 1000 == 0:
+                np.save(
+                    "data/movie_ids.npy",
+                    np.array(list(existing_ids))
+                )
+
+                print(
+                    f"Added {new_ids_added} new IDs "
+                    f"({len(existing_ids)} total)"
+                )
+
+
+
+np.save(
+    "data/movie_ids.npy",
+    np.array(list(existing_ids))
+)
+
+# add any missing letterboxd ids
+ids_set = set(np.load("data/movie_ids.npy"))
+df_letterboxd_ratings = pd.read_csv('data/letterboxd/ratings_withid.csv')
+df_letterboxd_watchlist = pd.read_csv('data/letterboxd/watchlist_withid.csv')
+
+watched_ids = df_letterboxd_ratings['id']
+watchlist_ids = df_letterboxd_watchlist['id']
+
+ids_set.update(watched_ids)
+ids_set.update(watchlist_ids)
+
+np.save(
+    "data/movie_ids.npy",
+    np.array(list(ids_set))
+)
+
