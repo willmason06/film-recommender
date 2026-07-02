@@ -45,7 +45,10 @@ y = np.array(y)
 
 
 
-model = LinearRegression()
+from sklearn.linear_model import Ridge
+
+model = Ridge(alpha=1.0)
+
 model.fit(X, y)
 predicted_ratings = model.predict(embeddings)
 
