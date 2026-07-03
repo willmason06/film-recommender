@@ -3,3 +3,5 @@ myenv/
 __pycache__/
 *.pyc
 test.py
+data/tmdb_movie_data.csv
+data/movie_embeddings.npy
