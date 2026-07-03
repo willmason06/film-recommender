@@ -5,45 +5,56 @@ from sklearn.manifold import TSNE
 import umap
 import matplotlib.pyplot as plt
 
-embeddings = np.load("data/movie_embeddings.npy")
-#embeddings = embeddings[:100]
 
 movie_ids = np.load("data/movie_ids.npy")
 
-df = pd.read_csv("data/tmdb_movie_data.csv")
-id_to_title = dict(zip(df["id"], df["title"]))
 
+def plot_embedding(labels=None, highlight_id=None):
+    reduced_embeddings = np.load(
+        "data/movie_embeddings_umap.npy"
+    )
 
-def plot_embedding(METHOD, labels=None, highlight_id=None):
-    match METHOD:
-        case 'pca':
-            pca = PCA(n_components=2)
-            reduced_embeddings = pca.fit_transform(embeddings)
-        
-        case 'tsne':
-            tsne = TSNE(n_components=2)
-            reduced_embeddings = tsne.fit_transform(embeddings)
-
-        case 'umap':
-            reduced_embeddings = umap.UMAP().fit_transform(embeddings)
-    
     fig, ax = plt.subplots(figsize=(12,12))
-    ax.scatter(reduced_embeddings[:,0], reduced_embeddings[:,1], marker='x', c=labels)
+    ax.scatter(reduced_embeddings[:,0], 
+               reduced_embeddings[:,1], 
+               marker='x', 
+               c=labels,
+               s=0.5,
+               alpha=0.1
+               )
     
     if highlight_id is not None:
 
-        for id in highlight_id:
+        df = pd.read_csv("data/tmdb_movie_data.csv")
+        id_to_title = dict(zip(df["id"], df["title"]))
 
-            matches = np.where(movie_ids == id)[0]
-            idx = matches[0]
+        title = id_to_title.get(id, "Unknown")
 
-            x = reduced_embeddings[idx, 0]
-            y = reduced_embeddings[idx, 1]
+        matches = np.where(movie_ids == id)[0]
+        idx = matches[0]
 
-            title = id_to_title.get(id, "Unknown")
-            ax.scatter(x,y, label=title, s=100)
+        x = reduced_embeddings[idx, 0]
+        y = reduced_embeddings[idx, 1]
+
+
+        # fix this
+        title = id_to_title.get(highlight_id, "Unknown")
+
+        ax.scatter(
+            x,
+            y,
+            s=100,
+            c="red"
+        )
+
+        ax.text(
+            x,
+            y,
+            title,
+            fontsize=10
+        )
             
-
-
     plt.legend()
     plt.show()
+
+    
