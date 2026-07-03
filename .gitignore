@@ -5,3 +5,4 @@ __pycache__/
 test.py
 data/tmdb_movie_data.csv
 data/movie_embeddings.npy
+data/movie_embeddings_pca50.npy
