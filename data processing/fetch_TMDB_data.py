@@ -11,7 +11,6 @@ API_KEY = os.getenv("TMDB_API_KEY")
 
 BASE_URL = "https://api.themoviedb.org/3"
 
-# missing??= 533121 35923 96578 101586 201990 260513 443487 total:296913
 
 def fetch_movie_data(movie_id):
     session = requests.Session()

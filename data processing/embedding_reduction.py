@@ -3,12 +3,7 @@ from sklearn.decomposition import PCA
 import umap
 import os
 
-
-ids = np.load("data/movie_ids.npy")
-embeddings = np.load(
-    "data/movie_embeddings.npy"
-).astype(np.float32)
-
+# save the umap config for if there needs to be any reruns
 
 if __name__ == "__main__":
         
@@ -20,13 +15,16 @@ if __name__ == "__main__":
         print('file50 exists')
 
     else:
+        embeddings = np.load(
+            "data/movie_embeddings.npy"
+        ).astype(np.float32)
 
         pca = PCA(
         n_components=50,
         random_state=42
         )
 
-        reduced_embeddings50 = pca.fit_transform(embeddings)
+        reduced_embeddings50 = pca.fit_transform(embeddings).astype(np.float32)
 
         np.save(
                 "data/movie_embeddings_pca50.npy",
@@ -86,9 +84,3 @@ if __name__ == "__main__":
         )
 
         print('reduced 2 saved')
-
-
-
-
-print('done')
-print('check dimensions of data/movie_embeddings_umap2.npy \n data/movie_embeddings_umap20.npy \n data/movie_embeddings_pca50.npy')
