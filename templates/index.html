@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Movie Recommender</title>
+</head>
+<body>
+
+<h1>Movie Recommender</h1>
+
+<button onclick="getRecommendations()">
+    Get Recommendations
+</button>
+
+<div id="results"></div>
+
+<script>
+async function getRecommendations() {
+    const response = await fetch("/recommend/577922");
+
+    const data = await response.json();
+
+    document.getElementById("results").innerHTML =
+        data.recommendations.join("<br>");
+}
+</script>
+
+</body>
+</html>
