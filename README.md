@@ -1,8 +1,8 @@
 # film-recommender
 
-Uses TMDB API to gather metadata on 10K of its most popular films films. 
+Uses TMDB API to gather metadata on almost 300k of its most popular films. 
 Then a sentence transformer maps metadata to 384D vectors. 
-Vectors are clustered by spectral clustering to group similar films together. 
+Vectors are clustered to group similar films together. 
 Personal data is imported from letterboxdand and using my ratings, a ML model is trained.
 Model can be used to predict ratings on unwatched films. 
 
