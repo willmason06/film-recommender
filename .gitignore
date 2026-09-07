@@ -1,8 +1,36 @@
+# Environment / secrets
 .env
+.env.*
+!.env.example
+
+# Virtual environments
+venv/
 myenv/
+.venv/
+env/
+
+# Python
 __pycache__/
 *.pyc
-test.py
-data/tmdb_movie_data.csv
-data/movie_embeddings.npy
-data/movie_embeddings_pca50.npy
+*.pyo
+*.egg-info/
+build/
+dist/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data dumps / caches / model artifacts (large, regenerable via the pipeline scripts)
+data/
+*.npy
+*.csv
+!templates/*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
